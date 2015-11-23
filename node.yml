@@ -1,0 +1,13 @@
+---
+# ansible-playbook -i hosts node.yml --private-key=$(vagrant ssh-config | grep Identity | cut -d' ' -f4)
+#   vagrant ssh-config
+- name: provisioning
+  hosts: test
+  user: vagrant
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - nvm
+    - sampleapp
+    - nginx
+

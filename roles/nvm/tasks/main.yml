@@ -1,0 +1,44 @@
+---
+#- name: install dependents packeges
+#  yum: name={{ item }} state=present
+#  with_items: ["gcc", "gcc-c++", "make", "openssl-devel", "zlib-devel", "gyp", "glibc-devel"]
+
+- name: create nvm directory
+  file: dest={{ nvm_install_dir }} state=directory
+
+- name: install nvm
+  get_url: url=https://raw.githubusercontent.com/creationix/nvm/{{nvm_version}}/nvm.sh dest={{nvm_install_dir}}/nvm.sh
+
+- name: set profile
+  template: src=nvm.sh.j2 dest=/etc/profile.d/nvm.sh
+
+- name: install {{ nvm_node_version }}
+  shell: source /etc/profile && nvm install {{ nvm_node_version }}
+  register: nvm_install_result
+  ignore_errors: true
+
+- name: check if {{ nvm_node_version }} is default node version
+  #shell: source /etc/profile && nvm ls | grep -e 'default -> {{ nvm_node_version }}'
+  shell: source /etc/profile && nvm ls | grep -e "^node ->.*{{ nvm_node_version }}.*(default)"
+  register: nvm_check_default
+  changed_when: false
+  ignore_errors: true
+
+- name: which node
+  shell: source /etc/profile && which node
+  register: nvm_node_install_path
+  changed_when: false
+
+- name: link bin nnode
+  file: src="{{ nvm_node_install_path.stdout }}" dest=/usr/bin/node state=link force=yes
+  when: nvm_node_install_path.stdout is defined
+
+- name: which npm
+  shell: source /etc/profile && which npm
+  register: nvm_npm_install_path
+  changed_when: false
+
+- name: link bin npm
+  file: src="{{ nvm_npm_install_path.stdout }}" dest=/usr/bin/npm state=link force=yes
+  when: nvm_npm_install_path.stdout is defined
+  

@@ -1,0 +1,18 @@
+---
+- name: install nginx repo (for vagrant)
+  yum: name=http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm state=present
+
+- name: install nginx
+  yum: name=nginx state=present
+
+- name: remove default configure
+  file: path=/etc/nginx/conf.d/default.conf state=absent
+  notify: restart nginx
+
+- name: template
+  template: src=nodejs.conf.j2 dest=/etc/nginx/conf.d/nodejs.conf
+  notify: restart nginx
+
+- name: enable service
+  service: name=nginx state=started enabled=yes
+

@@ -1,0 +1,5 @@
+- name: create app directory
+  file: dest=/opt/app state=directory
+
+- name: install sampleapp
+  copy: src=helloworld.js dest=/opt/app/
